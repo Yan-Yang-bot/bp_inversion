@@ -3,6 +3,8 @@ import torch
 from dataclasses import dataclass
 from typing import Union
 
+from tqdm import trange
+
 
 @dataclass
 class GSParams:
@@ -60,9 +62,10 @@ def _gray_scott_step(u: torch.Tensor, v: torch.Tensor, p: GSParams, dt: float):
     return u_next, v_next
 
 
-def n_steps(u: torch.Tensor, v: torch.Tensor, p: GSParams, dt: float, n: int):
+def n_steps(u: torch.Tensor, v: torch.Tensor, p: GSParams, dt: float, n: int,
+            disable_progress_bar=True):
     u2, v2 = u.clone(), v.clone()
-    for _ in range(n):
+    for _ in trange(n, desc="Steps with grad", leave=False, disable=disable_progress_bar):
         u2, v2 = _gray_scott_step(u2, v2, p, dt)
 
     v_max, v_min = v2.amax(), v2.amin()
