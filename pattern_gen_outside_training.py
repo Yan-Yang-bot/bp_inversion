@@ -4,7 +4,7 @@ from rd_generator import RDGenerator
 from tools import GSParams, init_state_batch
 import matplotlib.animation as animation
 from animation import get_initial_artists, updatefig
-from power_spectrum_2d import windowed_ps_2d_loss, ps_2d_loss
+from power_spectrum_2d import windowed_ps_2d_loss, ps_2d_loss, VGGGramLoss
 
 import matplotlib.pyplot as plt
 
@@ -47,14 +47,23 @@ task = 'test training forward' if task_id == 2 else \
        ''
 print(f"Current task: {task}")
 
-save_animation = False
-
-
 if __name__ == "__main__":
     if torch.cuda.is_available():
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
+    print("device:", device)
+    # To produce slope compare plots, set the next line to True and put the pair of losses in compare_pair.
+    save_animation = False
+    three_d = True
+    polyline_for_compare = False
+    compare_pair = []
+    vgg = VGGGramLoss(device)
+    candidate_losses = {
+        'non-windowed': lambda x1, x2: ps_2d_loss(x1, x2)[3].item(),
+        'windowed': lambda x1, x2: windowed_ps_2d_loss(x1, x2)[3].item(),
+        'vgg': lambda x1, x2: vgg(x1, x2).item(),
+    }
     params = [GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.068)]
     # params = GSParams(Du=0.16, Dv=0.08, F=0.035, k=0.065)
 
@@ -104,8 +113,9 @@ if __name__ == "__main__":
         exit(0)
     elif task == 'polyline':
         if len(sys.argv) < 6 and sys.argv[2] != "param_in_file":
-            print("Type `python pattern_gen_outside_training.py 5 <name_of_param_to_slice> "
-                  "<start_value> <end_value> <slice_num>` or `python pattern_gen_outside_training.py 5 param_in_file`.")
+            print("Type `python pattern_gen_outside_training.py 5 <optional: loss function> <name_of_param_to_slice> "
+                  "<start_value> <end_value> <slice_num>` or "
+                  "`python pattern_gen_outside_training.py 5 <optional: loss function> param_in_file`.")
             sys.exit(1)
         p = GSParams(Du=0.16, Dv=0.08, F=0.035, k=0.065)
         up, vp = u.clone(), v.clone()
@@ -113,10 +123,21 @@ if __name__ == "__main__":
         #                                                        max_steps=50000)
         _, v_batch, _ = RDGenerator.simulate_constant_steps(up, vp, p, num_steps=40000)
         loss_values = []
-        if sys.argv[2] != "param_in_file":
-            if len(sys.argv) > 6:
-                vname, vmin, vmax, steps = sys.argv[2], float(sys.argv[3]), float(sys.argv[4]), int(sys.argv[5])
-                v2name, v2min, v2max, steps2 = sys.argv[6], float(sys.argv[7]), float(sys.argv[8]), int(sys.argv[9])
+        loss_function_name = 'non-windowed'
+        skip_loss_name_base_index = 0
+        if sys.argv[2] in {'non-windowed', 'windowed', 'vgg'}:
+            loss_function_name = sys.argv[2]
+            skip_loss_name_base_index = 1
+        if sys.argv[2 + skip_loss_name_base_index] != "param_in_file":
+            if len(sys.argv) > (6 + skip_loss_name_base_index):
+                vname, vmin, vmax, steps = (sys.argv[2 + skip_loss_name_base_index],
+                                            float(sys.argv[3 + skip_loss_name_base_index]),
+                                            float(sys.argv[4 + skip_loss_name_base_index]),
+                                            int(sys.argv[5 + skip_loss_name_base_index]))
+                v2name, v2min, v2max, steps2 = (sys.argv[6 + skip_loss_name_base_index],
+                                                float(sys.argv[7 + skip_loss_name_base_index]),
+                                                float(sys.argv[8 + skip_loss_name_base_index]),
+                                                int(sys.argv[9 + skip_loss_name_base_index]))
                 values = [vmin + i * (vmax - vmin) / (steps - 1) for i in range(steps-1, -1, -1)]
                 values2 = [v2min + i * (v2max - v2min) / (steps2 - 1) for i in range(steps2)]
                 params = []
@@ -129,7 +150,10 @@ if __name__ == "__main__":
                         p_inner_list.append(_p)
                     params.append(p_inner_list)
             else:
-                vname, vmin, vmax, steps = sys.argv[2], float(sys.argv[3]), float(sys.argv[4]), int(sys.argv[5])
+                vname, vmin, vmax, steps = (sys.argv[2 + skip_loss_name_base_index],
+                                            float(sys.argv[3 + skip_loss_name_base_index]),
+                                            float(sys.argv[4 + skip_loss_name_base_index]),
+                                            int(sys.argv[5 + skip_loss_name_base_index]))
                 values = [vmin + i * (vmax - vmin) / (steps - 1) for i in range(steps)]
                 params = []
                 for value in values:
@@ -140,39 +164,105 @@ if __name__ == "__main__":
             values = [i for i, _ in enumerate(params)]
             vname = "Index of parameter sets"
 
+        loss_function = candidate_losses[loss_function_name]
+
         with torch.no_grad():
             if type(params[0]) is list:
                 for _p in params:
                     inner_loss_list = []
                     for i in range(steps2):
-                        _, v_final, _ = RDGenerator.simulate_constant_steps(u.clone(), v.clone(), _p[i], num_steps=25000)
-                        inner_loss_list.append(ps_2d_loss(v_batch, v_final)[3].item())
+                        _, v_final, _ = RDGenerator.simulate_constant_steps(u.clone(), v.clone(), _p[i],
+                                                                            num_steps=40000,
+                                                                            disable_progress_bar=bool(i % 5))
+                        inner_loss_list.append(loss_function(v_batch, v_final))
                     loss_values.append(inner_loss_list)
 
                 data_array = np.array(loss_values) # 0-F, 1-k
-                plt.imshow(data_array, cmap='viridis', extent=(v2min, v2max, vmin, vmax))  # or 'hot', 'plasma', 'gray'
-                plt.colorbar()
-                plt.xlabel(v2name)
-                plt.ylabel(vname)
-                plt.gca().set_aspect((v2max - v2min) / (vmax - vmin))
-                plt.title(f"Loss Landscape 2D Cross-Section ({v2name}-{vname})")
-                plt.show()
+                if three_d:
+                    v1_vals = np.linspace(vmax, vmin, data_array.shape[0])
+                    v2_vals = np.linspace(v2min, v2max, data_array.shape[1])
+                    K, F = np.meshgrid(v2_vals, v1_vals)
+                    fig = plt.figure(figsize=(10, 7))
+                    ax = fig.add_subplot(111, projection='3d')
+                    surf = ax.plot_surface(K, F, data_array, cmap='viridis', edgecolor='none', alpha=0.9)
+                    fig.colorbar(surf, ax=ax, shrink=0.5, label='Loss')
+                    ax.set_xlabel(v2name)
+                    ax.set_ylabel(vname)
+                    ax.set_zlabel('Loss Value')
+                    ax.set_title(f"Loss Landscape 3D ({v2name}-{vname})")
+                    plt.tight_layout()
+                else:
+                    plt.imshow(data_array, cmap='viridis', extent=(v2min, v2max, vmin, vmax))  # or 'hot', 'plasma', 'gray'
+                    plt.colorbar()
+                    plt.xlabel(v2name)
+                    plt.ylabel(vname)
+                    plt.gca().set_aspect((v2max - v2min) / (vmax - vmin))
+                    plt.title(f"Loss Landscape 2D Cross-Section ({v2name}-{vname})")
             else:
                 for _p in params:
                     # _, v_final, _, _ = RDGenerator(params=_p).simulate_to_steady_trunc_bptt(up, vp, device=device,
                     #                                                                         tol=1e-8, max_steps=50000,
                     #                                                                         disable_progress_bar=False)
                     _, v_final, _ = RDGenerator.simulate_constant_steps(u.clone(), v.clone(), _p, num_steps=40000)
-                    loss_values.append(ps_2d_loss(v_batch, v_final)[3].item())
-                                       # + torch.abs(v_batch.mean()-v_final.mean()).item())
+                    if polyline_for_compare:
+                        loss_values.append([l_func(v_batch, v_final) for l_func in compare_pair])
+                    else:
+                        loss_values.append(loss_function(v_batch, v_final))
 
-                plt.plot(values, loss_values, marker='o', linestyle='-', color='b', lw=0.5, ms=3, markeredgewidth=0)
-                plt.xlabel(vname)
-                plt.ylabel('Loss')
-                plt.title('Loss Landscape')
+                if polyline_for_compare:
+                    fig, ax = plt.subplots(figsize=(6, 6))
+
+                    used_left = []
+                    used_right = []
+                    min_gap = 5.5
+                    for lv in loss_values:
+                        color = 'steelblue' if lv[0] > lv[1] else 'tomato'
+                        ax.plot([0, 1], [lv[0], lv[1]], color=color, alpha=0.7, linewidth=2, marker='o', markersize=8)
+
+                    for i, lv in sorted(enumerate(loss_values), key=lambda _x: _x[1][0]):
+                        y_left = lv[0]
+                        for y in used_left:
+                            if abs(y_left - y) < min_gap:
+                                y_left = y + min_gap
+                        used_left.append(y_left)
+                        ax.text(-0.1, y_left, f'{lv[0]:.1f}', ha='right', va='center', fontsize=9)
+                        ax.text(-0.25, y_left, f'{i + 1:1d}', ha='right', va='center', fontsize=9)
+
+                    for lv in sorted(loss_values, key=lambda _x: _x[1]):
+                        y_right = lv[1]
+                        for y in used_right:
+                            if abs(y_right - y) < min_gap:
+                                y_right = y + min_gap
+                        used_right.append(y_right)
+                        ax.text(1.08, y_right, f'{lv[1]:.1f}', ha='left', va='center', fontsize=9)
+
+                    ax.set_xticks([0, 1])
+                    ax.set_xticklabels(['Non-windowed', 'Windowed'], fontsize=12)
+                    ax.set_xlim(-0.3, 1.3)
+                    ax.set_ylabel('Loss Value')
+                    ax.set_title(
+                        'Compare Two Loss Functions\n(blue: non-windowed > windowed\nred: windowed > non-windowed)')
+                    ax.spines['top'].set_visible(False)
+                    ax.spines['right'].set_visible(False)
+                    ax.spines['bottom'].set_visible(False)
+
+                    plt.tight_layout()
+                else:
+                    plt.plot(values, loss_values, marker='o', linestyle='-', color='b', lw=0.5, ms=3, markeredgewidth=0)
+                    plt.xlabel(vname)
+                    plt.ylabel('Loss')
+                    plt.title('Loss Landscape')
+
+            import os
+            if os.path.exists('/kaggle/working'):
+                plt.savefig('/kaggle/working/loss_landscape.png')
+            elif os.path.exists('/content'):
+                plt.savefig('/content/loss_landscape.png')
+            else:
                 plt.show()
         exit(0)
 
+    # For 'generate targets', 'test training forward', and 'show stored targets' tasks only
     fig, axes = plt.subplots(2, 2, figsize=(8, 8))
     v_batch_np = v_batch.detach().cpu().numpy().squeeze(1)
 
