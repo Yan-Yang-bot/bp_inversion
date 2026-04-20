@@ -123,6 +123,13 @@ if __name__ == "__main__":
         #                                                        max_steps=50000)
         _, v_batch, _ = RDGenerator.simulate_constant_steps(up, vp, p, num_steps=40000)
         loss_values = []
+        import json, os
+        path = "loss_matrix.jsonl"
+        if os.path.exists(path):
+            with open(path, "r") as f:
+                for line in f:
+                    loss_values.append(json.loads(line.strip()))
+                f.close()
         loss_function_name = 'non-windowed'
         skip_loss_name_base_index = 0
         if sys.argv[2] in {'non-windowed', 'windowed', 'vgg'}:
@@ -168,7 +175,7 @@ if __name__ == "__main__":
 
         with torch.no_grad():
             if type(params[0]) is list:
-                for _p in params:
+                for _p in params[len(loss_values):]:
                     inner_loss_list = []
                     for i in range(steps2):
                         _, v_final, _ = RDGenerator.simulate_constant_steps(u.clone(), v.clone(), _p[i],
@@ -176,6 +183,8 @@ if __name__ == "__main__":
                                                                             disable_progress_bar=bool(i % 5))
                         inner_loss_list.append(loss_function(v_batch, v_final))
                     loss_values.append(inner_loss_list)
+                    with open(path, "a") as f:
+                        f.write(json.dumps(inner_loss_list) + "\n")
 
                 data_array = np.array(loss_values) # 0-F, 1-k
                 if three_d:
