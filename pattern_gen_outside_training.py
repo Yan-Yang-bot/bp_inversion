@@ -19,7 +19,7 @@ def print_usage_and_exit():
         "2. test training forward (starting from noisy random parameters)\n"
         "3. load existing targets and show the first 4 of them\n"
         "4. show stepping animation\n"
-        "5. plot the polyline of loss values on a slice of the parameter space\n"
+        "5. plot loss values on a slice of the parameter space\n"
         "Type: python pattern_gen_outside_training.py <number of your option> <optional: path to existing targets>"
     )
     sys.exit(1)
@@ -43,8 +43,8 @@ task = 'test training forward' if task_id == 2 else \
        'generate targets' if task_id == 1 else \
        'show stored targets' if task_id ==3 else \
        'animation' if task_id == 4 else \
-       'polyline' if task_id == 5 else \
-       ''
+       'landscape' if task_id == 5 else \
+       'error'
 print(f"Current task: {task}")
 
 if __name__ == "__main__":
@@ -56,15 +56,19 @@ if __name__ == "__main__":
     # To produce slope compare plots, set the next line to True and put the pair of losses in compare_pair.
     save_animation = False
     three_d = True
-    polyline_for_compare = False
-    compare_pair = []
     vgg = VGGGramLoss(device)
     candidate_losses = {
         'non-windowed': lambda x1, x2: ps_2d_loss(x1, x2)[3].item(),
         'windowed': lambda x1, x2: windowed_ps_2d_loss(x1, x2)[3].item(),
         'vgg': lambda x1, x2: vgg(x1, x2).item(),
     }
-    params = [GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.068), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.068)]
+    params = [GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.03, k=0.068),
+              GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.03666666666666667, k=0.068),
+              GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.043333333333333335, k=0.068),
+              GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.05, k=0.068),
+              GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.05666666666666667, k=0.068),
+              GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.06333333333333334, k=0.068),
+              GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.053), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.0555), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.058), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.0605), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.063), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.0655), GSParams(Du=0.16, Dv=0.08, F=0.07, k=0.068)]
     # params = GSParams(Du=0.16, Dv=0.08, F=0.035, k=0.065)
 
     print('Generating initial batch...')
@@ -80,6 +84,7 @@ if __name__ == "__main__":
     elif task == 'show stored targets':
         v_batch = torch.load(target_pt_path, map_location=device)
     elif task == 'animation':
+        print("Modify the bool `save_animation` to True if you want to save it as a file instead of show it directly.")
         if type(params) is list:
             l = len(params)
             repeat = [(l-1) // 4 + 1, 1, 1, 1]
@@ -111,11 +116,18 @@ if __name__ == "__main__":
         # show the animation
         plt.show()
         exit(0)
-    elif task == 'polyline':
+    elif task == 'landscape':
         if len(sys.argv) < 6 and sys.argv[2] != "param_in_file":
-            print("Type `python pattern_gen_outside_training.py 5 <optional: loss function> <name_of_param_to_slice> "
-                  "<start_value> <end_value> <slice_num>` or "
-                  "`python pattern_gen_outside_training.py 5 <optional: loss function> param_in_file`.")
+            print("Type `python pattern_gen_outside_training.py 5 <OPTIONAL: loss function name> "
+                  "<name_of_param_to_slice> <start_value> <end_value> <slice_num>` or "
+                  "`python pattern_gen_outside_training.py 5 <OPTIONAL: loss function name> "
+                  "<name_of_param_to_slice_1> <start_value_1> <end_value_1> <slice_num_1> "
+                  "<name_of_param_to_slice_2> <start_value_2> <end_value_2> <slice_num_2>` or "
+                  "`python pattern_gen_outside_training.py 5 <OPTIONAL: loss function name> param_in_file`.")
+            print("Modify the bool `three_d` to True to turn on 3d plot with two parameters; "
+                  "when use the `param_in_file` command line option, modify the bool `compare_loss_funcs` to True "
+                  "to compare a pair of loss functions (defined in `compare_pair`) "
+                  "on a list of parameter sets defined in the Python file.")
             sys.exit(1)
         p = GSParams(Du=0.16, Dv=0.08, F=0.035, k=0.065)
         up, vp = u.clone(), v.clone()
@@ -208,22 +220,24 @@ if __name__ == "__main__":
                     plt.gca().set_aspect((v2max - v2min) / (vmax - vmin))
                     plt.title(f"Loss Landscape 2D Cross-Section ({v2name}-{vname})")
             else:
+                compare_loss_funcs = False
+                compare_pair = [candidate_losses['non-windowed'], candidate_losses['windowed']]
                 for _p in params:
                     # _, v_final, _, _ = RDGenerator(params=_p).simulate_to_steady_trunc_bptt(up, vp, device=device,
                     #                                                                         tol=1e-8, max_steps=50000,
                     #                                                                         disable_progress_bar=False)
                     _, v_final, _ = RDGenerator.simulate_constant_steps(u.clone(), v.clone(), _p, num_steps=40000)
-                    if polyline_for_compare:
+                    if compare_loss_funcs:
                         loss_values.append([l_func(v_batch, v_final) for l_func in compare_pair])
                     else:
                         loss_values.append(loss_function(v_batch, v_final))
 
-                if polyline_for_compare:
+                if compare_loss_funcs:
                     fig, ax = plt.subplots(figsize=(6, 6))
 
                     used_left = []
                     used_right = []
-                    min_gap = 5.5
+                    min_gap = 0.5
                     for lv in loss_values:
                         color = 'steelblue' if lv[0] > lv[1] else 'tomato'
                         ax.plot([0, 1], [lv[0], lv[1]], color=color, alpha=0.7, linewidth=2, marker='o', markersize=8)
