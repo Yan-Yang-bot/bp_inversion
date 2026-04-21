@@ -26,85 +26,14 @@ There is a target generation stage the first time you run it, but the targets wi
 
 ---
 
-💡 If you're not satisfied with just log information, copy the logged parameters into `generate_targets.py` and use the following to show stepping animations using such parameters (a list of multiple parameters from a parameter search trajectory can be used for simultaneous animation, so that you can see where the optimizer is going):
+💡 If you're not satisfied with just log information, copy the logged parameters into `generate_targets.py` and use the following to show stepping animations using such parameters (a list of multiple parameters from a parameter search trajectory can be used for simultaneous animation, so that you can see where the optimizer was going):
 ```
 python pattern_gen_outside_training.py 4
 ```
 
 ---
 
-💡 To plot pair-wise losses (as heat maps) among generated targets in `*.pt`, use
+💡 There are multiple ways to investigate the loss landscape cross-sections, and the following will print instructions:
 ```
-python within_target_loss.py
+python pattern_gen_outside_training.py 5
 ```
-
----
-
-## How This is Different from PINN
-
-As I understand them, PINNs primarily adapt the model representation by incorporating physical constraints into the loss function, while still relying on standard backpropagation-based optimizers. (The field is moving fast, and I may be behind on newer variants.)
-
-My idea is almost the opposite.
-Instead of reshaping the PDE/ODE into a neural-network-like form, I try to keep the original dynamical system intact and experiment with modifying or customizing the optimizer itself, performing backward propagation directly through the PDE/ODE to search for parameters whose stable outcomes are closest to a target pattern.
-
-At the moment, I’m honestly not sure whether one can design an optimizer strategy that is capable of traversing a highly rugged dynamical-system parameter landscape and reliably reaching such target parameter sets. Even if the resulting strategy ends up looking quite different from standard backpropagation, that would still be acceptable to me.
-
-The viability question must be somehow discussed before I proceed. My background in dynamical systems is limited, and ChatGPT tends to respond optimistically regardless of feasibility.
-
-The original motivation was to connect pattern-generating systems like Gray–Scott with downstream tasks in an end-to-end differentiable pipeline. I also have the intuition that, in terms of information flow, direct backpropagation is more efficient than alternative indirect approaches, which is why I started thinking along this direction in the first place.
-
----
-
-## Project Description
-
-This repository contains **early experimental code** on **gradient-based parameter learning in reaction–diffusion systems**, using the Gray–Scott model.
-
-It implements a **preliminary truncated BPTT** scheme through unrolled Gray-Scott simulations, following part of the ideas from my Zenodo technical note [1]. The goal is to probe **numerical stability and gradient behavior** when backpropagating through time-stepped PDEs, without downstream tasks.
-
-Other useful components include:
-
-- an adaptive learning-rate scheme;
-
-- an embedded animation tool
-
-    -- visualizing simulation steps for any parameter set along the learning trajectory,
-
-    -- ensuring that its output is identical with what produced during training.
-
-    -- visualizing simulation steps for multiple parameter sets (e.g., from the same trajectory) to investigate a trajectory.
-
-**Next step:** the author will **systematically discuss how gradient-based optimizers can traverse different regions of the Gray–Scott parameter space**, including:
-
-- **homogeneous steady states**  
-  *(including trivial / collapsed solutions)*
-
-- **pattern-forming steady states**
-
-- **non-convergent but bounded dynamics**  
-  *(oscillatory / quasi-periodic)*
-
-- **chaotic spatiotemporal dynamics**  
-  *(if verified, not numerical)*
-
-- **bifurcation boundaries** (removed the misuse of "fractal-like" as it is used to describe phase map [3])
-
-*(The author plans to avoid going into **numerically invalid regions** strictly, so they are not in the above list.)*
-
-These insights will guide further code updates and optimizer design.  
-Implicit differentiation and other extensions discussed in [1,2] are not yet implemented.
-
-Contact: **yan.yang.research@proton.me**
-
-
-### References
-
-[1] Y. Yang, *Expectation-Maximization Style Algorithm for Task-Driven Differentiable Renderer Optimization*.  
-Zenodo, Nov. 21, 2025.  
-DOI: https://doi.org/10.5281/zenodo.17662717
-
-[2] Y. Yang, *Towards PDE-Structured Generative Modeling: Differentiable Simulators, Flow-Matching, and Pattern Manifolds (Proposal)*.  
-Zenodo, Dec. 11, 2025.  
-DOI: https://doi.org/10.5281/zenodo.17897116
-
-[3] McDonald, S.W. et al., *Fractal basin boundaries*. Physica D, 17(2), 125-153.
-
