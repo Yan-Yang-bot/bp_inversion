@@ -26,7 +26,7 @@ There is a target generation stage the first time you run it, but the targets wi
 
 ---
 
-💡 If you're not satisfied with just log information, copy the logged parameters into `generate_targets.py` and use the following to show stepping animations using such parameters (a list of multiple parameters from a parameter search trajectory can be used for simultaneous animation, so that you can see where the optimizer was going):
+💡 If you're not satisfied with just log information, copy the logged parameters into `pattern_gen_outside_training.py` and use the following to show stepping animations using such parameters (a list of multiple parameters from a parameter search trajectory can be used for simultaneous animation, so that you can see where the optimizer was going):
 ```
 python pattern_gen_outside_training.py 4
 ```
